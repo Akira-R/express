@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
 
-const pgp = require('pg-promise')
+const pgp = require('pg-promise')(/*.options.*/)
 const db = pgp('postgres://dt468_postgresql_user:UVj3oowHc75YzPBUoI0dajr4nlaaoru7@dpg-chi4mht269vf5qa5tjqg-a/dt468_postgresql')
 
 const bodyParser = require('body-parser')
