@@ -1,17 +1,30 @@
 const express = require("express");
 const app = express();
-const port = process.env.PORT || 3000;
+const cors = require('cors');
+const port = process.env.PORT || 4000;
 
 const pgp = require('pg-promise')(/*.options.*/)
-const db = pgp('postgres://dt468_postgresql_user:UVj3oowHc75YzPBUoI0dajr4nlaaoru7@dpg-chi4mht269vf5qa5tjqg-a/dt468_postgresql')
+const db = pgp('postgres://dt468postgres_user:TmKoQPjaTaRel0Vi91HsYpkZW42ghLjB@dpg-chibmg3hp8u7g2fdu7q0-a.singapore-postgres.render.com/dt468postgres?ssl=true')
+const top3Course = [{code:"DT160" ,cname:"C programming", description: "Dummy text"},
+{code:"DT161" ,cname:"C++ programming", description: "Dummy text"},
+{code:"DT261" ,cname:"Data Structures", description: "Dummy text"}]
+
+const courseList = [{code:"DT160" ,cname:"C programming", description: "Dummy text"},
+{code:"DT161" ,cname:"C++ programming", description: "Dummy text"},
+{code:"DT162" ,cname:"OOP programming", description: "Dummy text"},
+{code:"DT163" ,cname:"OOP programming Lab", description: "Dummy text"},
+{code:"DT468" ,cname:"Special Topics", description: "Dummy text"},
+{code:"DT261" ,cname:"Data Structures", description: "Dummy text"}]
 
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 app.use(
     bodyParser.urlencoded({
         extended: true,
-    })
-)
+    }))
+app.use(cors({
+    origin: '*'
+}))
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
@@ -36,8 +49,29 @@ app.get('/cat/:subPath/:nextSubPath', (req, res) => {
     res.send(`Accept Cat ${subPath} Sub Request. and ${nextSubPath}`)
 })
 
-app.get('/students', (req, res) => {
-    db.any('select * from public.student')
+app.get('/top3', (req, res) => {
+    res.json({ result: top3Course })
+})
+
+app.get('/courseList', (req, res) => {
+    res.json({ result: courseList })
+})
+
+app.get('/users', (req, res) => {
+    db.any('select * from public.user_account')
+    .then((data)=>{
+        console.log('all users: ', data)
+        res.json(data)
+    })
+    .catch((error)=> {
+        console.log('ERROR:', error)
+        res.send("ERROR: can't get data")
+    })
+})
+
+app.get('/users/:name', (req, res) => {
+    const {name} = req.params;
+    db.any('select * from public.user_account where "name" = $1', name)
     .then((data)=>{
         console.log('all student: ', data)
         res.json(data)
@@ -48,22 +82,10 @@ app.get('/students', (req, res) => {
     })
 })
 
-app.get('/students', (req, res) => {
-    db.any('select * from public.student where "id" = $1', id)
-    .then((data)=>{
-        console.log('all student: ', data)
-        res.json(data)
-    })
-    .catch((error)=> {
-        console.log('ERROR:', error)
-        res.send("ERROR: can't get data")
-    })
-})
-
-app.post('/student', (req, res) => {
+app.post('/users', (req, res) => {
     console.log('Got body:', req.body);
-    const {id} = req.body;
-    db.any('select * from public.student where "id" = $1', id)
+    const {name} = req.body;
+    db.any('select * from public.user_account where "name" = $1', name)
     .then((data)=>{
         console.log('DATA:', data)
         res.json(data)
